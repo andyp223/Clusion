@@ -88,11 +88,12 @@ public class DynRR {
 
 	// ***********************************************************************************************//
 
-	public static byte[] query(byte[] stk, ConcurrentMap<String, byte[]> dictionary)
+	public static byte[] query(String stk, ConcurrentMap<String, byte[]> dictionary)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 
-		byte[] result = dictionary.get(new String(CryptoPrimitives.generateHmac(stk, "" + 1)));
+		//byte[] result = dictionary.get(new String(CryptoPrimitives.generateHmac(stk, "" + 1)));
+		byte[] result = dictionary.get(stk);
 		return result;
 	}
 
