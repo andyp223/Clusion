@@ -53,7 +53,7 @@ public class TestDynRR {
 		        		update(command[1], dictionary);
 		        }
 		        else if (command[0].equals("query")) { // NOTE: we want to return the token note the file name
-		        		System.out.println(query(command[1], dictionary));
+		        		query(command[1], dictionary);
 		        } else {
 		            System.out.println("ERROR: Invalid Input");
 		            return;
