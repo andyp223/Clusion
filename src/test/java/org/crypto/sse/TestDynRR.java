@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
-
+import java.nio.charset.StandardCharsets;
 import javax.crypto.NoSuchPaddingException;
 
 import org.mapdb.DB;
@@ -24,18 +24,23 @@ public class TestDynRR {
 		String utk1 = input.substring(0,input.length()/3);
 		String utk2 = input.substring(input.length()/3);
 		byte[] utk2bytes = utk2.getBytes("UTF-8");
-		System.out.println(Arrays.toString(utk2bytes));
+		//System.out.println(utk1);
+		//System.out.println(Arrays.toString(utk2bytes));
+		String hmac_utk1 = Arrays.toString(CryptoPrimitives.generateHmac(utk1.getBytes("UTF-8"), "" + 1));
+		//System.out.println(hmac_utk1);
 		Map<String,byte[]> utk = new HashMap<String,byte[]>();
-		utk.put(utk1, utk2bytes);
+		utk.put(hmac_utk1, utk2bytes);
 		DynRR.update(dictionary, utk); 
 	}
 	
 	//query
-	private static byte[] query(String utk, ConcurrentMap<String, byte[]> dictionary) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
-		byte[] token = utk.getBytes("UTF-8");
-		byte[] result = DynRR.query(utk, dictionary);
-		System.out.println(Arrays.toString(result));
-		return result;
+	private static String query(String utk, ConcurrentMap<String, byte[]> dictionary) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
+		//System.out.println(utk);
+		String token = Arrays.toString(CryptoPrimitives.generateHmac(utk.getBytes("UTF-8"), "" + 1));
+		byte[] result = DynRR.query(token, dictionary);
+		String output = new String(result,StandardCharsets.UTF_8);
+		System.out.println(output);
+		return output;
 	}
 
 	
@@ -44,7 +49,7 @@ public class TestDynRR {
 			.allocateStartSize(124 * 1024 * 1024).allocateIncrement(5 * 1024 * 1024).make();
 		ConcurrentMap<String, byte[]> dictionary = (ConcurrentMap<String, byte[]>) db.hashMap("test").createOrOpen();		
 
-		System.out.println("Buffered Reader Begins Here");
+		//System.out.println("Buffered Reader Begins Here");
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
 			String input;
 		    while ((input = br.readLine()) != null) {
@@ -53,10 +58,9 @@ public class TestDynRR {
 		        		update(command[1], dictionary);
 		        }
 		        else if (command[0].equals("query")) { // NOTE: we want to return the token note the file name
-		        		System.out.println(query(command[1], dictionary));
+		        		query(command[1], dictionary);
 		        } else {
 		            System.out.println("ERROR: Invalid Input");
-		            return;
 		        }
 		    }
 		    } catch (IOException ioe) {
