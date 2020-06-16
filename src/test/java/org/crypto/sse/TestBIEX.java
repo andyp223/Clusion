@@ -158,7 +158,7 @@ public class TestBIEX {
 		
 		token.put(query.length+" "+query[0].length, tokenGeneral);
 		
-		System.out.println("TOKEN GENERAL:");
+		System.out.println("general:");
 		
 		for (int i = 0; i < tokenGeneral.size(); i++) {
 			
