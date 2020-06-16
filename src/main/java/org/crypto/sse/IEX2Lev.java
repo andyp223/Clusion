@@ -253,13 +253,33 @@ public class IEX2Lev implements Serializable {
 
 	// ***********************************************************************************************//
 
-	public static List<TokenDIS> token(List<byte[]> listOfkeys, List<String> search)
+//	public static List<TokenDIS> token(List<byte[]> listOfkeys, List<String> search)
+//			throws UnsupportedEncodingException {
+//		List<TokenDIS> token = new ArrayList<TokenDIS>();
+//
+//		for (int i = 0; i < search.size(); i++) {
+//
+//			List<String> subSearch = new ArrayList<String>();
+//			// Create a temporary list that carry keywords in *order*
+//			for (int j = i; j < search.size(); j++) {
+//				subSearch.add(search.get(j));
+//			}
+//
+//			token.add(new TokenDIS(subSearch, listOfkeys));
+//		}
+//		return token;
+//
+//	}
+//
+//	
+	
+	public static List<TokenDIS> tokenBytes(List<byte[]> listOfkeys, List<byte[]> search)
 			throws UnsupportedEncodingException {
 		List<TokenDIS> token = new ArrayList<TokenDIS>();
-
+//
 		for (int i = 0; i < search.size(); i++) {
 
-			List<String> subSearch = new ArrayList<String>();
+			List<byte[]> subSearch = new ArrayList<byte[]>();
 			// Create a temporary list that carry keywords in *order*
 			for (int j = i; j < search.size(); j++) {
 				subSearch.add(search.get(j));

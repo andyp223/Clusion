@@ -31,17 +31,59 @@ public class TokenDIS implements Serializable {
 	public byte[][] tokenMMGlobal;
 	public byte[] tokenDIC;
 	public List<byte[][]> tokenMMLocal = new ArrayList<byte[][]>();
+//
+//	public TokenDIS(List<String> subSearch, List<byte[]> listOfkeys) throws UnsupportedEncodingException {
+//
+//		
+//		
+//		this.tokenMMGlobal = RR2Lev.token(listOfkeys.get(0), subSearch.get(0));
+//		this.tokenDIC = CryptoPrimitives.generateHmac(listOfkeys.get(1), 3 + subSearch.get(0));
+//		
+//		byte[] bytes = subSearch.get(0).getBytes();
+//		
+//		
+//		System.out.println("TOKENDIS");
+//		for (int i = 0; i  < bytes.length; i++) {
+//			System.out.print(Byte.toUnsignedInt(bytes[i]) + ",");
+//		}
+//		System.out.println();
+//
+//		for (int i = 1; i < subSearch.size(); i++) {
+//			tokenMMLocal.add(
+//					RR2Lev.token(CryptoPrimitives.generateHmac(listOfkeys.get(0), subSearch.get(0)), subSearch.get(i)));
+//		}
+//
+//	}
+//	
+	public TokenDIS(List<byte[]> subSearch, List<byte[]> listOfkeys) throws UnsupportedEncodingException {
 
-	public TokenDIS(List<String> subSearch, List<byte[]> listOfkeys) throws UnsupportedEncodingException {
-
+		
+	
 		this.tokenMMGlobal = RR2Lev.token(listOfkeys.get(0), subSearch.get(0));
-		this.tokenDIC = CryptoPrimitives.generateHmac(listOfkeys.get(1), 3 + subSearch.get(0));
+//		this.tokenDIC = CryptoPrimitives.generateHmac(listOfkeys.get(1), 3 + subSearch.get(0));
+		
+		byte[] keywordBytes = new byte[33];
+		
+		keywordBytes[0] = "3".getBytes()[0];
+		for (int i = 1; i < 33; i++) {
+			keywordBytes[i] = subSearch.get(0)[i-1];
+		}
+		this.tokenDIC = CryptoPrimitives.generateHmac(listOfkeys.get(1), keywordBytes);
+		
+		byte[] bytes = subSearch.get(0);
+	
 
 		for (int i = 1; i < subSearch.size(); i++) {
 			tokenMMLocal.add(
 					RR2Lev.token(CryptoPrimitives.generateHmac(listOfkeys.get(0), subSearch.get(0)), subSearch.get(i)));
 		}
 
+	}
+	
+	public TokenDIS(byte[][] tokenMMGlobal, byte[] tokenDIC, List<byte[][]> tokenMMLocal) {
+		this.tokenMMGlobal = tokenMMGlobal;
+		this.tokenDIC = tokenDIC;
+		this.tokenMMLocal = tokenMMLocal;
 	}
 
 	public byte[][] getTokenMMGlobal() {
@@ -67,5 +109,40 @@ public class TokenDIS implements Serializable {
 	public void setTokenMMLocal(List<byte[][]> tokenMMLocal) {
 		this.tokenMMLocal = tokenMMLocal;
 	}
+	
+	public void printTokenDic() {
+		for (int i = 0; i < this.tokenDIC.length; i++) {
+			System.out.print(Byte.toUnsignedInt(this.tokenDIC[i]) + ",");
+		}
+	}
+	
+	public void printTokenMMGlobal() {
+
+		System.out.println("\nGTK1:");
+		for (int j = 0; j < this.tokenMMGlobal[0].length; j++) {
+			System.out.print(Integer.toBinaryString(Byte.toUnsignedInt(this.tokenMMGlobal[0][j])) + ",");
+		}
+
+		System.out.println("\nGTK2:");
+		for (int j = 0; j < this.tokenMMGlobal[1].length; j++) {
+			System.out.print(Integer.toBinaryString(Byte.toUnsignedInt(this.tokenMMGlobal[1][j])) + ",");
+		}
+	}
+	
+
+	public void printTokenMMLocal() {
+		for (int i = 0; i < this.tokenMMLocal.size(); i++) {
+			byte[][] curr = this.tokenMMLocal.get(i);
+			
+			for (int j = 0; j < curr.length; j++) {
+				for (int k = 0; k < curr[j].length; k++) {
+					System.out.print(Integer.toBinaryString(Byte.toUnsignedInt(curr[j][k])) + ",");		
+				}
+				System.out.print("\n");
+			}
+			System.out.print("\n\n");
+		}
+	}
+
 
 }

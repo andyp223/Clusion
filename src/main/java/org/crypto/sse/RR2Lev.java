@@ -421,10 +421,37 @@ public class RR2Lev implements Serializable {
 	// ***********************************************************************************************//
 
 	public static byte[][] token(byte[] key, String word) throws UnsupportedEncodingException {
-
 		byte[][] keys = new byte[2][];
 		keys[0] = CryptoPrimitives.generateHmac(key, 1 + word);
 		keys[1] = CryptoPrimitives.generateHmac(key, 2 + word);
+
+		return keys;
+	}
+	
+	
+	
+	public static byte[][] token(byte[] key, byte[] word) throws UnsupportedEncodingException {
+		byte[][] keys = new byte[2][];
+		
+		byte[] word1 = new byte[33];
+		byte[] word2 = new byte[33];
+		
+		word1[0] = "1".getBytes()[0];
+		word2[0] = "2".getBytes()[0];
+	
+		
+		for (int i = 1; i < 33; i++) {
+			word1[i] = word[i-1];
+			word2[i] = word[i-1];
+		}
+		
+		for (int i = 0; i  < word1.length; i++) {
+			System.out.print(Byte.toUnsignedInt(word1[i]) + ",");
+		}
+		System.out.println();
+		
+		keys[0] = CryptoPrimitives.generateHmac(key, word1);
+		keys[1] = CryptoPrimitives.generateHmac(key, word2);
 
 		return keys;
 	}
