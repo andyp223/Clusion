@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.lang.Object;
+import java.nio.charset.StandardCharsets;
+
 import javax.crypto.NoSuchPaddingException;
 
 public class TestBIEX {
@@ -29,14 +32,23 @@ public class TestBIEX {
 	public static void main(String[] args) throws Exception {
 
 
-		
-
-		// add three keys - here initialized to zeros for test purposes
 		List<byte[]> listSKs = new ArrayList<byte[]>();
-		listSKs.add(new byte[32]);
-		listSKs.add(new byte[32]);
-		listSKs.add(new byte[32]);
-
+		
+		byte[] masterKey = hexStringToByteArray("b6ca37ab8d488e5157348b168d29e2ccc6aeda960a9a7cbba60bdd0df9ec90b7");
+		
+		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "1"));
+		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "2"));
+		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "3"));
+		
+	
+		// for (int i = 0; i < listSKs.size(); i++) {
+		// 	System.out.println("key " + i + ": ");
+		// 	for (int j = 0; j < listSKs.get(i).length; j++) {
+		// 		System.out.print(Byte.toUnsignedInt(listSKs.get(i)[j]) + ",");
+		// 	}
+		// 	System.out.println("\n");
+		// }
+	
 		
 		String pathName = "test/";
 
@@ -51,51 +63,114 @@ public class TestBIEX {
 
 		IEX2Lev disj = IEX2Lev.setup(listSKs, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
 
-
+	
+		
 		// this is an example of how to perform boolean queries
 
 		// number of disjunctions
-		int numDisjunctions = 3;
+		int numDisjunctions = 2;
 
 		// Storing the CNF form
-		String[][] query = new String[numDisjunctions][];
-		for (int i = 0; i < numDisjunctions; i++) {
-			query[i] = "providence boston".split(" ");
-		}
-
+		byte[][][] query = new byte[numDisjunctions][][];
+			
+		
+		query[0] = formatQuery("aa,bb");
+		query[1] = formatQuery("cc,dd");
+		
 		
 		Map<String, List<TokenDIS>> token =  token_BIEX(listSKs, query);
 		query_BIEX(disj, token);
 		
 	}
 	
+	public static byte[][] formatQuery(String query) {
+		
+
+		String[] temp = query.split(",");
+
+		byte[][] result = new byte[temp.length][32];
+				
+		for (int i = 0; i < temp.length; i++) {
+			byte[] b = hexStringToByteArray(temp[i]);
+			
+			byte[] bytes = new byte[32];
+			
+			if (b.length < 32) {
+				for (int j = 0; j < b.length; j++) {
+					bytes[j] = b[j];
+				}
+				for (int j = b.length; j < 32; j++) {
+					bytes[j] = 0;
+				}
+			}
+			result[i] = bytes;
+		}
+		
+		return result;
+	}
 	
-	public static Map<String, List<TokenDIS>> token_BIEX(List<byte[]> listSK, String[][] query) throws UnsupportedEncodingException {
+	public static byte[] hexStringToByteArray(String s) {
+	    int len = s.length();
+	    byte[] data = new byte[len / 2];
+	    for (int i = 0; i < len; i += 2) {
+	        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+	                             + Character.digit(s.charAt(i+1), 16));
+	    }
+	    return data;
+	}
+	
+	
+	public static Map<String, List<TokenDIS>> token_BIEX(List<byte[]> listSK, byte[][][] query) throws UnsupportedEncodingException {
 		
 		Map<String, List<TokenDIS>> token = new HashMap<String, List<TokenDIS>>();
 		
 
 		for (int i = 1; i < query.length; i++) {
 			for (int k = 0; k < query[0].length; k++) {
-				List<String> searchTMP = new ArrayList<String>();
+				List<byte[]> searchTMP = new ArrayList<byte[]>();
 				searchTMP.add(query[0][k]);
 				
 				for (int r = 0; r < query[i].length; r++) {
 					searchTMP.add(query[i][r]);
 				}
 	
-				List<TokenDIS> tokenTMP = IEX2Lev.token(listSK, searchTMP);
+				List<TokenDIS> tokenTMP = IEX2Lev.tokenBytes(listSK, searchTMP);
+				
+				for (int j = 0; j < tokenTMP.size(); j++) {
+					tokenTMP.get(j).printTokenMMGlobal();
+					
+					System.out.println("\nDict: ");
+					tokenTMP.get(j).printTokenDic();
+					System.out.println("\nLocal: ");
+					
+					tokenTMP.get(j).printTokenMMLocal();					
+				}
 				token.put(i+" "+k, tokenTMP);
 			}
 		}
 		
 		// Generate the IEX token
-		List<String> searchBol = new ArrayList<String>();
+		List<byte[]> searchBol = new ArrayList<byte[]>();
 		for (int i = 0; i < query[0].length; i++) {
 			searchBol.add(query[0][i]);
 		}
-		List<TokenDIS> tokenGeneral = IEX2Lev.token(listSK, searchBol);
+		List<TokenDIS> tokenGeneral = IEX2Lev.tokenBytes(listSK, searchBol);
+		
 		token.put(query.length+" "+query[0].length, tokenGeneral);
+		
+		System.out.println("TOKEN GENERAL:");
+		
+		for (int i = 0; i < tokenGeneral.size(); i++) {
+			
+			System.out.println("\nGlobal: ");
+			tokenGeneral.get(i).printTokenMMGlobal();
+			
+			System.out.println("\nDict: ");
+			tokenGeneral.get(i).printTokenDic();
+			System.out.println("\nLocal: ");
+			
+			tokenGeneral.get(i).printTokenMMLocal();
+		}
 		
 		return token;
 	}
