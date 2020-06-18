@@ -120,12 +120,12 @@ public class TokenDIS implements Serializable {
 
 		System.out.println("\nGTK1:");
 		for (int j = 0; j < this.tokenMMGlobal[0].length; j++) {
-			System.out.print(Integer.toBinaryString(Byte.toUnsignedInt(this.tokenMMGlobal[0][j])) + ",");
+			System.out.print(Byte.toUnsignedInt(this.tokenMMGlobal[0][j]) + ",");
 		}
 
 		System.out.println("\nGTK2:");
 		for (int j = 0; j < this.tokenMMGlobal[1].length; j++) {
-			System.out.print(Integer.toBinaryString(Byte.toUnsignedInt(this.tokenMMGlobal[1][j])) + ",");
+			System.out.print(Byte.toUnsignedInt(this.tokenMMGlobal[1][j]) + ",");
 		}
 	}
 	
@@ -136,7 +136,7 @@ public class TokenDIS implements Serializable {
 			
 			for (int j = 0; j < curr.length; j++) {
 				for (int k = 0; k < curr[j].length; k++) {
-					System.out.print(Integer.toBinaryString(Byte.toUnsignedInt(curr[j][k])) + ",");		
+					System.out.print(Byte.toUnsignedInt(curr[j][k]) + ",");		
 				}
 				System.out.print("\n");
 			}

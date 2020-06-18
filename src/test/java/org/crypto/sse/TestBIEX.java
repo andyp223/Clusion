@@ -68,15 +68,13 @@ public class TestBIEX {
 		// this is an example of how to perform boolean queries
 
 		// number of disjunctions
-		int numDisjunctions = 2;
+		int numDisjunctions = 1;
 
 		// Storing the CNF form
 		byte[][][] query = new byte[numDisjunctions][][];
 			
 		
-		query[0] = formatQuery("aa,bb");
-		query[1] = formatQuery("cc,dd");
-		
+		query[0] = formatQuery("6162636461626364616263646162636465666768656667686566676865666768");		
 		
 		Map<String, List<TokenDIS>> token =  token_BIEX(listSKs, query);
 		query_BIEX(disj, token);
@@ -84,23 +82,24 @@ public class TestBIEX {
 	}
 	
 	public static byte[][] formatQuery(String query) {
-		
-
 		String[] temp = query.split(",");
-
 		byte[][] result = new byte[temp.length][32];
 				
 		for (int i = 0; i < temp.length; i++) {
 			byte[] b = hexStringToByteArray(temp[i]);
 			
 			byte[] bytes = new byte[32];
-			
+			// not handling larger than 32 bytes 
 			if (b.length < 32) {
 				for (int j = 0; j < b.length; j++) {
 					bytes[j] = b[j];
 				}
 				for (int j = b.length; j < 32; j++) {
 					bytes[j] = 0;
+				}
+			} else {
+				for (int j = 0; j < b.length; j++) {
+					bytes[j] = b[j];
 				}
 			}
 			result[i] = bytes;
@@ -112,10 +111,11 @@ public class TestBIEX {
 	public static byte[] hexStringToByteArray(String s) {
 	    int len = s.length();
 	    byte[] data = new byte[len / 2];
-	    for (int i = 0; i < len; i += 2) {
-	        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-	                             + Character.digit(s.charAt(i+1), 16));
-	    }
+	    for (int i = 0; i < data.length; i++) {
+	    	   int index = i * 2;
+	    	   int j = Integer.parseInt(s.substring(index, index + 2), 16);
+	    	   data[i] = (byte) j;
+	    	}
 	    return data;
 	}
 	
@@ -154,6 +154,8 @@ public class TestBIEX {
 		for (int i = 0; i < query[0].length; i++) {
 			searchBol.add(query[0][i]);
 		}
+		
+		
 		List<TokenDIS> tokenGeneral = IEX2Lev.tokenBytes(listSK, searchBol);
 		
 		token.put(query.length+" "+query[0].length, tokenGeneral);

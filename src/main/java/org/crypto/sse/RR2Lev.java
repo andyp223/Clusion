@@ -445,11 +445,6 @@ public class RR2Lev implements Serializable {
 			word2[i] = word[i-1];
 		}
 		
-		for (int i = 0; i  < word1.length; i++) {
-			System.out.print(Byte.toUnsignedInt(word1[i]) + ",");
-		}
-		System.out.println();
-		
 		keys[0] = CryptoPrimitives.generateHmac(key, word1);
 		keys[1] = CryptoPrimitives.generateHmac(key, word2);
 
