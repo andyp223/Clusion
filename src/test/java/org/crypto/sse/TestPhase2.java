@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -171,20 +172,16 @@ System.out.println("Final result " + tmpBol);
 	    return data;
 	}
 	
-	
-	// create a while loop that is constantly listening for requests. 
-	
-	public static void main(String[] args) throws Exception {
-		
+	public static void getDisj(String key, String pathName) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException, IOException, InterruptedException, ExecutionException {
 		List<byte[]> listSKs = new ArrayList<byte[]>();
 		
-		byte[] masterKey = hexStringToByteArray("b6ca37ab8d488e5157348b168d29e2ccc6aeda960a9a7cbba60bdd0df9ec90b7");
+		byte[] masterKey = hexStringToByteArray(key);
 		
 		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "1"));
 		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "2"));
 		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "3"));
 		
-		String pathName = "test/";
+		//String pathName = "test/";
 
 		ArrayList<File> listOfFile = new ArrayList<File>();
 		
@@ -196,18 +193,75 @@ System.out.println("Final result " + tmpBol);
 
 		// we need SKs to make the multimap? ?? 
 		IEX2Lev disj = IEX2Lev.setup(listSKs, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
+		String filename = "stream.ser";
+		try {
+			FileOutputStream file = new FileOutputStream(filename);
+			ObjectOutputStream out = new ObjectOutputStream(file); 
+			
+			out.writeObject(disj);
+			out.close();
+			
+			file.close();
+			System.out.println("Setup completed");
+		}
+		catch(IOException ex) 
+        { 
+            System.out.println("Should never get here"); 
+        } 
+  
+		
+	}
+	
+	
+	// create a while loop that is constantly listening for requests. 
+	
+	public static void main(String[] args) throws Exception {
+		IEX2Lev disj = null;
 		
 		
 		System.out.println("Buffered Reader Begins Here");
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
 			String input;
 		    while ((input = br.readLine()) != null) {
-		    		String[] command = input.split(" ", 2);
-		        if (command[0].equals("query")) {
-		        		String jsonString = command[1];
-		        		JSONObject obj = new JSONObject(jsonString);
-		        		Map<String, List<TokenDIS>> tokens = getTokens(obj);
-		        		query_BIEX(disj,tokens);
+		    	String[] command = input.split(" ", 2);
+		    	if (command[0].equals("setup")) {
+		    		String[] inputs = command[1].split(",", 2);
+		    		getDisj(inputs[0],inputs[1]);
+		    	}
+		    	else if (command[0].equals("receive")) {
+		    		try
+		            {    
+		                // Reading the object from a file 
+		    			String filename = "stream.ser";
+		                FileInputStream file = new FileInputStream(filename); 
+		                ObjectInputStream in = new ObjectInputStream(file); 
+		                  
+		                // Method for deserialization of object 
+		                disj = (IEX2Lev)in.readObject(); 
+		                  
+		                in.close(); 
+		                file.close(); 
+		                  
+		                System.out.println("Received!");
+		            } 
+		              
+		            catch(IOException ex) 
+		            { 
+		                System.out.println("Should never get here"); 
+		            } 
+		             
+		    		
+		    	}
+		    	else if (command[0].equals("query")) {
+		    		if (disj != null) {
+		    			String jsonString = command[1];
+			        	JSONObject obj = new JSONObject(jsonString);
+			        	Map<String, List<TokenDIS>> tokens = getTokens(obj);
+			        	query_BIEX(disj,tokens);	
+		    		}
+		    		else {
+		    			System.out.println("disj is null");
+		    		}
 		        }
 		    }
 		    } catch (IOException ioe) {
