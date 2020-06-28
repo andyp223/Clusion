@@ -54,7 +54,8 @@ public class TestGR {
 		System.out.println("Generating searchable map"); 
 		System.out.println("Working Directory = " +
 	              System.getProperty("user.dir"));
-		String pathName = "text-files"; // relative path to the files 
+		long startTime = System.nanoTime();
+		String pathName = "test"; // relative path to the files 
 
 		ArrayList<File> listOfFile = new ArrayList<File>();
 		TextProc.listf(pathName, listOfFile);
@@ -73,7 +74,9 @@ public class TestGR {
 		// Empty the previous multimap
 
 		TextExtractPar.lp1 = ArrayListMultimap.create();
-		
+		long endTime = System.nanoTime();
+		long duration = (endTime-startTime)/1000000;
+		System.out.println("Duration = " + duration);
 		System.out.println("Buffered Reader Begins Here");
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
 			String input;
