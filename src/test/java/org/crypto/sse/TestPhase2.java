@@ -18,12 +18,15 @@ import java.util.concurrent.ExecutionException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.Collection;
 
 
 import javax.crypto.NoSuchPaddingException;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 // Multimap setup 
@@ -172,6 +175,31 @@ System.out.println("Final result " + tmpBol);
 	    return data;
 	}
 	
+	
+	private static Multimap<String, String> padLookup1(Multimap<String, String> lookup) {
+
+		Multimap<String, String> output = ArrayListMultimap.create();
+		for (String key : lookup.keySet()) {
+			String paddedKey = Strings.padEnd(key, 32, '*');
+			output.putAll(paddedKey, lookup.get(key));
+		}
+		return output;
+	}
+
+	private static Multimap<String, String> padLookup2(Multimap<String, String> lookup) {
+
+		Multimap<String, String> output = ArrayListMultimap.create();
+		
+		for (String key : lookup.keySet()) {
+			Collection<String> values = lookup.get(key);
+	        for(String value : values){
+	        	String paddedValue = Strings.padEnd(value, 32, '*');
+	        	output.put(key, paddedValue);
+	        }
+		}
+		return output;
+	}
+	
 	public static void getDisj(String key, String pathName) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException, IOException, InterruptedException, ExecutionException {
 		List<byte[]> listSKs = new ArrayList<byte[]>();
 		
@@ -190,9 +218,10 @@ System.out.println("Final result " + tmpBol);
 		
 
 		TextProc.TextProc(false, pathName);
+		
 
 		// we need SKs to make the multimap? ?? 
-		IEX2Lev disj = IEX2Lev.setup(listSKs, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
+		IEX2Lev disj = IEX2Lev.setup(listSKs, padLookup1(TextExtractPar.lp1), padLookup2(TextExtractPar.lp2), bigBlock, smallBlock, 0);
 		String filename = "stream.ser";
 		try {
 			FileOutputStream file = new FileOutputStream(filename);

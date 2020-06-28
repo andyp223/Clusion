@@ -160,7 +160,7 @@ public class TextExtractPar implements Serializable {
 		}
 
 	}
-
+	
 	private static TextExtractPar extractOneDoc(File[] listOfFile) throws FileNotFoundException {
 
 		Multimap<String, String> lookup1 = ArrayListMultimap.create();
