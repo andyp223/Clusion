@@ -51,6 +51,14 @@ public class TestGR {
 		String pass = "hello world"; // NOTE: Should this be our key ? 
 		byte[] sk = RR2Lev.keyGen(256, pass, "salt/salt", 100000);
 		//System.out.println(new BouncyCastleProvider().getVersion());
+		try {
+			FileWriter writer = new FileWriter("temp.txt");
+			writer.write("hello");
+			writer.close();
+		} catch(IOException e) {
+			System.out.println("SHOULD NEVER GET HERE");
+		}
+		
 		System.out.println("Generating searchable map"); 
 		System.out.println("Working Directory = " +
 	              System.getProperty("user.dir"));
@@ -76,6 +84,13 @@ public class TestGR {
 		TextExtractPar.lp1 = ArrayListMultimap.create();
 		long endTime = System.nanoTime();
 		long duration = (endTime-startTime)/1000000;
+		try {
+			FileWriter writer = new FileWriter("temp.txt");
+			writer.write("Duration = " + duration);
+			writer.close();
+		} catch(IOException e) {
+			System.out.println("SHOULD NEVER GET HERE");
+		}
 		System.out.println("Duration = " + duration);
 		System.out.println("Buffered Reader Begins Here");
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
