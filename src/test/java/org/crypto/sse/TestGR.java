@@ -52,9 +52,14 @@ public class TestGR {
 		byte[] sk = RR2Lev.keyGen(256, pass, "salt/salt", 100000);
 		//System.out.println(new BouncyCastleProvider().getVersion());
 		try {
-			FileWriter writer = new FileWriter("temp.txt");
-			writer.write("hello");
-			writer.close();
+	        File f1 = new File("temp.txt");
+	        if(!f1.exists()) {
+	           f1.createNewFile();
+	        }
+			FileWriter writer = new FileWriter(f1.getName(),true);
+			BufferedWriter bw = new BufferedWriter(writer);
+			bw.write("hello \n");
+			bw.close();
 		} catch(IOException e) {
 			System.out.println("SHOULD NEVER GET HERE");
 		}
@@ -85,9 +90,14 @@ public class TestGR {
 		long endTime = System.nanoTime();
 		long duration = (endTime-startTime)/1000000;
 		try {
-			FileWriter writer = new FileWriter("temp.txt");
-			writer.write("Duration = " + duration);
-			writer.close();
+	        File f1 = new File("temp.txt");
+	        if(!f1.exists()) {
+	           f1.createNewFile();
+	        }
+			FileWriter writer = new FileWriter(f1.getName(),true);
+			BufferedWriter bw = new BufferedWriter(writer);
+			bw.write("Duration = " + duration + " \n");
+			bw.close();
 		} catch(IOException e) {
 			System.out.println("SHOULD NEVER GET HERE");
 		}

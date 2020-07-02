@@ -355,6 +355,22 @@ public class TextExtractPar implements Serializable {
 			// Filter threshold
 			int counterDoc = 0;
 			for (int i = 0; i < lines.size(); i++) {
+				int tmp = i % 100000;
+				if (tmp == 0) {
+					try {
+				        File f1 = new File("temp.txt");
+				        if(!f1.exists()) {
+				           f1.createNewFile();
+				        }
+						FileWriter writer = new FileWriter(f1.getName(),true);
+						BufferedWriter bw = new BufferedWriter(writer);
+						bw.write("Lines Read = " + i + " \n");
+						System.out.println("Lines Read = " + i);
+						bw.close();
+					} catch(IOException e) {
+						System.out.println("SHOULD NEVER GET HERE");
+					}
+				}
 
 				CharArraySet noise = EnglishAnalyzer.getDefaultStopSet();
 
