@@ -23,14 +23,10 @@ import org.mapdb.DBMaker;
 public class TestDynRR {
 	// update
 	private static void update(String input, ConcurrentMap<String, byte[]> dictionary) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
-		System.out.println("Currently in update phase");
 		String utk1 = input.substring(0,input.length()/3);
 		String utk2 = input.substring(input.length()/3);
 		byte[] utk2bytes = utk2.getBytes("UTF-8");
-		//System.out.println(utk1);
-		//System.out.println(Arrays.toString(utk2bytes));
 		String hmac_utk1 = Arrays.toString(CryptoPrimitives.generateHmac(utk1.getBytes("UTF-8"), "" + 1));
-		//System.out.println(hmac_utk1);
 		Map<String,byte[]> utk = new HashMap<String,byte[]>();
 		utk.put(hmac_utk1, utk2bytes);
 		DynRR.update(dictionary, utk); 
@@ -38,8 +34,6 @@ public class TestDynRR {
 	
 	//query
 	private static String query(String utk, ConcurrentMap<String, byte[]> dictionary) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
-		//System.out.println(utk);
-		System.out.println("Currently in query phase");
 		String token = Arrays.toString(CryptoPrimitives.generateHmac(utk.getBytes("UTF-8"), "" + 1));
 		byte[] result = DynRR.query(token, dictionary);
 		String output = new String(result,StandardCharsets.UTF_8);
