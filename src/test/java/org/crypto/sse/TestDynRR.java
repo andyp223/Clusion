@@ -53,13 +53,8 @@ public class TestDynRR {
 				String utk1 = contents[0];
 				String utk2 = contents[1];
 				byte[] utk2bytes = utk2.getBytes("UTF-8");
-				//System.out.println(utk1);
-				//System.out.println(Arrays.toString(utk2bytes));
 				String hmac_utk1 = Arrays.toString(CryptoPrimitives.generateHmac(utk1.getBytes("UTF-8"), "" + 1));
-				//System.out.println(hmac_utk1);
-
 				utk.put(hmac_utk1, utk2bytes);
-				// contents [0] serial number , contents [1] county id
 			}
 			DynRR.update(dictionary, utk); 
 		} catch (FileNotFoundException e) {
