@@ -1,8 +1,11 @@
 package org.crypto.sse;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -45,10 +48,30 @@ public class TestDynRR {
 		String csvfile = filename;
 		String line = "";
 		BufferedReader br;
+		long startTime = System.nanoTime();
 		Map<String,byte[]> utk = new HashMap<String,byte[]>();
 		try {
 			br = new BufferedReader(new FileReader(csvfile));
+			int counter = 0;
 			while ((line = br.readLine()) != null) {
+				counter = counter + 1;
+				int tmp = counter % 1000;
+				if (tmp == 0) {
+					try {
+				        File f1 = new File("temp.txt");
+				        if(!f1.exists()) {
+				           f1.createNewFile();
+				        }
+						FileWriter writer = new FileWriter(f1.getName(),true);
+						BufferedWriter bw = new BufferedWriter(writer);
+						bw.write("Lines Read = " + counter + " \n");
+						System.out.println("Lines Read = " + counter);
+						bw.close();
+					} catch(IOException e) {
+						System.out.println("SHOULD NEVER GET HERE");
+					}
+				}
+
 				String[] contents = line.split(",");
 				String utk1 = contents[0];
 				String utk2 = contents[1];
@@ -60,6 +83,21 @@ public class TestDynRR {
 		} catch (FileNotFoundException e) {
 			System.out.println("SHOULD NEVER GET HERE");
 		}
+		long endTime = System.nanoTime();
+		long duration = (endTime-startTime)/1000000;
+		try {
+	        File f1 = new File("temp.txt");
+	        if(!f1.exists()) {
+	           f1.createNewFile();
+	        }
+			FileWriter writer = new FileWriter(f1.getName(),true);
+			BufferedWriter bw = new BufferedWriter(writer);
+			bw.write("Duration = " + duration + " \n");
+			bw.close();
+		} catch(IOException e) {
+			System.out.println("SHOULD NEVER GET HERE");
+		}
+		
 	}
 	
 	public static void main(String[] args) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException  { 
