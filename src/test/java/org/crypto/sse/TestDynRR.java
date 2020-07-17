@@ -35,6 +35,20 @@ public class TestDynRR {
 		DynRR.update(dictionary, utk); 
 	}
 	
+	private static void updateBatch(String input, ConcurrentMap<String, byte[]> dictionary) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
+		String[] utks = input.split(",");
+		Map<String,byte[]> utk_dict = new HashMap<String,byte[]>();
+		for (String utk : utks) {
+			System.out.println(utk);
+			String utk1 = utk.substring(0,utk.length()/3);
+			String utk2 = utk.substring(utk.length()/3);
+			byte[] utk2bytes = utk2.getBytes("UTF-8");
+			String hmac_utk1 = Arrays.toString(CryptoPrimitives.generateHmac(utk1.getBytes("UTF-8"), "" + 1));
+			utk_dict.put(hmac_utk1, utk2bytes);
+		}
+		DynRR.update(dictionary, utk_dict); 
+	}
+	
 	//query
 	private static String query(String utk, ConcurrentMap<String, byte[]> dictionary) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
 		String token = Arrays.toString(CryptoPrimitives.generateHmac(utk.getBytes("UTF-8"), "" + 1));
@@ -115,8 +129,11 @@ public class TestDynRR {
 			    	setup(command[1], dictionary);
 			    }
 			    else if (command[0].equals("update")) {
-		        		update(command[1], dictionary);
+		        	update(command[1], dictionary);
 		        }
+			    else if (command[0].equals("updateBatch")) {
+	        		updateBatch(command[1], dictionary);
+			    }
 		        else if (command[0].equals("query")) { // NOTE: we want to return the token note the file name
 		        		query(command[1], dictionary);
 		        } else {
