@@ -16,6 +16,7 @@ import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.NoSuchPaddingException;
@@ -58,6 +59,27 @@ public class TestDynRR {
 		return output;
 	}
 	
+    private static String getRandomHexString(int numchars){
+        Random r = new Random();
+        StringBuffer sb = new StringBuffer();
+        while(sb.length() < numchars){
+            sb.append(Integer.toHexString(r.nextInt()));
+        }
+
+        return sb.toString().substring(0, numchars);
+    }
+    
+	public static void setup2(int num_tokens, ConcurrentMap<String, byte[]> dictionary) throws UnsupportedEncodingException {
+		Map<String,byte[]> utk = new HashMap<String,byte[]>();
+		for (int i = 0; i < num_tokens; i ++) {
+			String tk1 = getRandomHexString(64);
+			String tk2 = getRandomHexString(128);
+			utk.put(tk1, tk2.getBytes("UTF-8"));
+		}
+		DynRR.update(dictionary,utk);
+		System.out.println("Finished Update Timing!");
+		
+	}
 	public static void setup(String filename, ConcurrentMap<String, byte[]> dictionary) throws UnsupportedEncodingException, IOException {
 		String csvfile = filename;
 		String line = "";
@@ -127,6 +149,9 @@ public class TestDynRR {
 		    		String[] command = input.split(" ", 2);
 			    if (command[0].equals("setup")) {
 			    	setup(command[1], dictionary);
+			    }
+			    else if (command[0].equals("setup2")) {
+			    	setup2(Integer.parseInt(command[1]), dictionary);
 			    }
 			    else if (command[0].equals("update")) {
 		        	update(command[1], dictionary);
