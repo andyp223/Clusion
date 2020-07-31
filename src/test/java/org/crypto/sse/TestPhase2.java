@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import javax.crypto.NoSuchPaddingException;
 
+import com.google.gson.Gson;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterators;
@@ -110,7 +111,8 @@ for (int i = 1; i < queryLength; i++) {
 
 }
 
-System.out.println("Final result " + tmpBol);
+Gson gson = new Gson();
+System.out.println(gson.toJson(tmpBol));
 
 
 }
