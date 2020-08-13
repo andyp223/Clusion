@@ -41,7 +41,7 @@ public class TestPhase2 {
 	static int bigBlock = 1000;
 	static int smallBlock = 100;
 	
-	public static void query_BIEX(IEX2Lev disj, Map<String, List<TokenDIS>> token) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+	public static Set<String> query_BIEX(IEX2Lev disj, Map<String, List<TokenDIS>> token) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 	NoSuchProviderException, NoSuchPaddingException, UnsupportedEncodingException, IOException {
 
 
@@ -107,14 +107,11 @@ for (int i = 1; i < queryLength; i++) {
 
 		}
 	}
-	tmpBol.retainAll(finalResult);			
-
+	tmpBol.retainAll(finalResult);	
 }
 
-Gson gson = new Gson();
-System.out.println(gson.toJson(tmpBol));
 
-
+return tmpBol;
 }
 	
 	public static byte[] jsonToBytes(JSONArray obj) throws JSONException {
@@ -248,7 +245,7 @@ System.out.println(gson.toJson(tmpBol));
 	
 	public static void main(String[] args) throws Exception {
 		IEX2Lev disj = null;
-		
+		IEX2Lev disj_updated = null;
 		
 		System.out.println("Buffered Reader Begins Here");
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
@@ -282,13 +279,52 @@ System.out.println(gson.toJson(tmpBol));
 		            } 
 		             
 		    		
+		    	} else if (command[0].equals("update")) {
+		    		try
+		            {    
+		                // Reading the object from a file 
+		    			String filename = "stream.ser";
+		                FileInputStream file = new FileInputStream(filename); 
+		                ObjectInputStream in = new ObjectInputStream(file); 
+		             
+		                // Method for deserialization of object 
+		                disj_updated = (IEX2Lev)in.readObject(); 
+		                  
+		                in.close(); 
+		                file.close(); 
+		                  
+		                System.out.println("Update received!");
+		            } 
+		              
+		            catch(IOException ex) 
+		            { 
+		                System.out.println("Should never get here"); 
+		            } 
+		             
+		    		
 		    	}
 		    	else if (command[0].equals("query")) {
-		    		if (disj != null) {
+		    		if (disj != null && disj_updated != null) {
 		    			String jsonString = command[1];
 			        	JSONObject obj = new JSONObject(jsonString);
 			        	Map<String, List<TokenDIS>> tokens = getTokens(obj);
-			        	query_BIEX(disj,tokens);	
+			        	
+			        	Set<String> results = new HashSet<String>();
+			        	
+			        	results.addAll(query_BIEX(disj,tokens));
+			        	results.addAll(query_BIEX(disj_updated,tokens));	
+			        	
+			        	Gson gson = new Gson();
+			        	System.out.println(gson.toJson(results));
+		    		}
+		    		else if (disj != null) {
+		    			String jsonString = command[1];
+			        	JSONObject obj = new JSONObject(jsonString);
+			        	Map<String, List<TokenDIS>> tokens = getTokens(obj);
+			        	Set<String> results = query_BIEX(disj,tokens);	
+			        	
+			        	Gson gson = new Gson();
+			        	System.out.println(gson.toJson(results));
 		    		}
 		    		else {
 		    			System.out.println("disj is null");

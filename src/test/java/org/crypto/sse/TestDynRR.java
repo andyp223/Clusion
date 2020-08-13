@@ -69,6 +69,7 @@ public class TestDynRR {
         return sb.toString().substring(0, numchars);
     }
     
+    // static set up. generates num_tokens of random tokens
 	public static void setup2(int num_tokens, ConcurrentMap<String, byte[]> dictionary) throws UnsupportedEncodingException {
 		Map<String,byte[]> utk = new HashMap<String,byte[]>();
 		for (int i = 0; i < num_tokens; i ++) {
@@ -148,19 +149,32 @@ public class TestDynRR {
 		    while ((input = br.readLine()) != null) {
 		    		String[] command = input.split(" ", 2);
 			    if (command[0].equals("setup")) {
+					long start = System.nanoTime();
 			    	setup(command[1], dictionary);
+		            System.out.println("setup time (ms): " + ((System.nanoTime()-start)/1000000));
 			    }
 			    else if (command[0].equals("setup2")) {
+					long start = System.nanoTime();
 			    	setup2(Integer.parseInt(command[1]), dictionary);
+		            System.out.println("static setup time (ms): " + ((System.nanoTime()-start)/1000000));
+
 			    }
 			    else if (command[0].equals("update")) {
-		        	update(command[1], dictionary);
+					long start = System.nanoTime();
+			    	update(command[1], dictionary);
+		            System.out.println("update time (ms): " + ((System.nanoTime()-start)/1000000));
+
 		        }
 			    else if (command[0].equals("updateBatch")) {
+					long start = System.nanoTime();
 	        		updateBatch(command[1], dictionary);
+		            System.out.println("update batch time (ms): " + ((System.nanoTime()-start)/1000000));
+
 			    }
 		        else if (command[0].equals("query")) { // NOTE: we want to return the token note the file name
-		        		query(command[1], dictionary);
+					long start = System.nanoTime();
+		        	query(command[1], dictionary);
+			        System.out.println("query time (ms): " + ((System.nanoTime()-start)/1000000));
 		        } else {
 		            System.out.println("ERROR: Invalid Input");
 		        }
@@ -171,6 +185,4 @@ public class TestDynRR {
 		    }
 			db.close();
 		}
-		
-		
 	}
