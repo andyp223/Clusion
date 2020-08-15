@@ -52,10 +52,12 @@ public class TestDynRR {
 	
 	//query
 	private static String query(String utk, ConcurrentMap<String, byte[]> dictionary) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
+		long start = System.nanoTime();
 		String token = Arrays.toString(CryptoPrimitives.generateHmac(utk.getBytes("UTF-8"), "" + 1));
 		byte[] result = DynRR.query(token, dictionary);
 		String output = new String(result,StandardCharsets.UTF_8);
-		System.out.println(output);
+//		DO NOT CHANGE. Output needs to be parsed as such
+		System.out.println(output + "," + ((System.nanoTime()-start)));
 		return output;
 	}
 	
@@ -151,30 +153,28 @@ public class TestDynRR {
 			    if (command[0].equals("setup")) {
 					long start = System.nanoTime();
 			    	setup(command[1], dictionary);
-		            System.out.println("setup time (ms): " + ((System.nanoTime()-start)/1000000));
+		            System.out.println("setup time (ns): " + ((System.nanoTime()-start)));
 			    }
 			    else if (command[0].equals("setup2")) {
 					long start = System.nanoTime();
 			    	setup2(Integer.parseInt(command[1]), dictionary);
-		            System.out.println("static setup time (ms): " + ((System.nanoTime()-start)/1000000));
+		            System.out.println("static setup time (ns): " + ((System.nanoTime()-start)));
 
 			    }
 			    else if (command[0].equals("update")) {
 					long start = System.nanoTime();
 			    	update(command[1], dictionary);
-		            System.out.println("update time (ms): " + ((System.nanoTime()-start)/1000000));
+		            System.out.println("update time (ns): " + ((System.nanoTime()-start)));
 
 		        }
 			    else if (command[0].equals("updateBatch")) {
 					long start = System.nanoTime();
 	        		updateBatch(command[1], dictionary);
-		            System.out.println("update batch time (ms): " + ((System.nanoTime()-start)/1000000));
+		            System.out.println("update batch time (ns): " + ((System.nanoTime()-start)));
 
 			    }
-		        else if (command[0].equals("query")) { // NOTE: we want to return the token note the file name
-					long start = System.nanoTime();
+		        else if (command[0].equals("query")) {
 		        	query(command[1], dictionary);
-			        System.out.println("query time (ms): " + ((System.nanoTime()-start)/1000000));
 		        } else {
 		            System.out.println("ERROR: Invalid Input");
 		        }
