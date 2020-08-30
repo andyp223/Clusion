@@ -365,34 +365,18 @@ public class TextExtractPar implements Serializable {
 						FileWriter writer = new FileWriter(f1.getName(),true);
 						BufferedWriter bw = new BufferedWriter(writer);
 						bw.write("Lines Read = " + i + " \n");
-						System.out.println("Lines Read = " + i);
 						bw.close();
 					} catch(IOException e) {
 						System.out.println("SHOULD NEVER GET HERE");
 					}
 				}
 
-				CharArraySet noise = EnglishAnalyzer.getDefaultStopSet();
-
-				// We are using a standard tokenizer that eliminates the stop
-				// words. We can use Stemming tokenizer such Porter
-				// A set of English noise keywords is used that will eliminates
-				// words such as "the, a, etc"
-
-				Analyzer analyzer = new StandardAnalyzer(noise);
-				List<String> token0 = Tokenizer.tokenizeString(analyzer, lines.get(i));
+				String[] tokensArray = lines.get(i).split("[,]");
 				List<String> token = new ArrayList<String>();
-				//removing numbers/1-letter keywords
-				for (int j=0; j<token0.size();j++){
-					if ((!token0.get(j).matches(".*\\d+.*")
-							&&
-							(token0.get(j)).length() >1)){
-						token.add(token0.get(j));
-					}
+				for (int j=0; j < tokensArray.length; j++) {
+					token.add(tokensArray[j]);
 				}
-				
 				temporaryCounter = temporaryCounter + token.size();
-				
 				
 
 				for (int j = 0; j < token.size(); j++) {

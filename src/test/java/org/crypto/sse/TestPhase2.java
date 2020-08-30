@@ -1,6 +1,8 @@
 package org.crypto.sse;
 
 import java.io.*;
+import java.io.FileWriter;
+
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -201,24 +203,19 @@ return tmpBol;
 	
 	public static void getDisj(String key, String pathName) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException, IOException, InterruptedException, ExecutionException {
 		List<byte[]> listSKs = new ArrayList<byte[]>();
-		
 		byte[] masterKey = hexStringToByteArray(key);
+		
+		long startTime = System.currentTimeMillis();
 		
 		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "1"));
 		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "2"));
 		listSKs.add(CryptoPrimitives.generateHmac(masterKey, "3"));
 		
-		//String pathName = "test/";
 
 		ArrayList<File> listOfFile = new ArrayList<File>();
-		
-
 		TextProc.listf(pathName, listOfFile);
-		
-
 		TextProc.TextProc(false, pathName);
 		
-
 		// we need SKs to make the multimap? ?? 
 		IEX2Lev disj = IEX2Lev.setup(listSKs, padLookup1(TextExtractPar.lp1), padLookup2(TextExtractPar.lp2), bigBlock, smallBlock, 0);
 		String filename = "stream.ser";
@@ -230,7 +227,7 @@ return tmpBol;
 			out.close();
 			
 			file.close();
-			System.out.println("Setup completed");
+			System.out.println("Setup time (ms): " + (System.currentTimeMillis()-startTime));
 		}
 		catch(IOException ex) 
         { 
@@ -260,6 +257,7 @@ return tmpBol;
 		    		try
 		            {    
 		                // Reading the object from a file 
+						long start = System.nanoTime();
 		    			String filename = "stream.ser";
 		                FileInputStream file = new FileInputStream(filename); 
 		                ObjectInputStream in = new ObjectInputStream(file); 
@@ -269,8 +267,8 @@ return tmpBol;
 		                  
 		                in.close(); 
 		                file.close(); 
-		                  
-		                System.out.println("Received!");
+		                long end = System.nanoTime();
+		                System.out.println("receive time (ns): " + (end-start));
 		            } 
 		              
 		            catch(IOException ex) 
@@ -282,6 +280,7 @@ return tmpBol;
 		    	} else if (command[0].equals("update")) {
 		    		try
 		            {    
+						long start = System.nanoTime();
 		                // Reading the object from a file 
 		    			String filename = "stream.ser";
 		                FileInputStream file = new FileInputStream(filename); 
@@ -292,8 +291,8 @@ return tmpBol;
 		                  
 		                in.close(); 
 		                file.close(); 
-		                  
-		                System.out.println("Update received!");
+		                long end = System.nanoTime();
+		                System.out.println("update time (ns): " + (end-start));
 		            } 
 		              
 		            catch(IOException ex) 
@@ -304,7 +303,9 @@ return tmpBol;
 		    		
 		    	}
 		    	else if (command[0].equals("query")) {
+		    		long start = System.nanoTime();
 		    		if (disj != null && disj_updated != null) {
+		    			
 		    			String jsonString = command[1];
 			        	JSONObject obj = new JSONObject(jsonString);
 			        	Map<String, List<TokenDIS>> tokens = getTokens(obj);
@@ -323,12 +324,19 @@ return tmpBol;
 			        	Map<String, List<TokenDIS>> tokens = getTokens(obj);
 			        	Set<String> results = query_BIEX(disj,tokens);	
 			        	
-			        	Gson gson = new Gson();
-			        	System.out.println(gson.toJson(results));
+			        	Writer writer = new FileWriter("data/record_ids.json");			        	
+			        
+			        	new Gson().toJson(results, writer);
+			        	
+			        	writer.close();
+//			        	Gson gson = new Gson();
+//			        	System.out.println(gson.toJson(results));
 		    		}
 		    		else {
 		    			System.out.println("disj is null");
 		    		}
+		    		long end = System.nanoTime();
+		    		System.out.println("query time (ns): " + (end-start));
 		        }
 		    }
 		    } catch (IOException ioe) {

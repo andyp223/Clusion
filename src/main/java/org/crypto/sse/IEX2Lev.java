@@ -169,7 +169,6 @@ public class IEX2Lev implements Serializable {
 		long startTime = System.nanoTime();
 
 		for (String keyword : lookup.keySet()) {
-
 			// Stats for keeping track with the evaluation
 
 			for (int j = 0; j < 100; j++) {
@@ -235,7 +234,6 @@ public class IEX2Lev implements Serializable {
 
 			}
 			counter++;
-
 		}
 
 		long endTime = System.nanoTime();

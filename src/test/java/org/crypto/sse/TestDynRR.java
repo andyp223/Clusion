@@ -39,15 +39,19 @@ public class TestDynRR {
 	private static void updateBatch(String input, ConcurrentMap<String, byte[]> dictionary) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
 		String[] utks = input.split(",");
 		Map<String,byte[]> utk_dict = new HashMap<String,byte[]>();
+		long start = System.nanoTime();
 		for (String utk : utks) {
-			System.out.println(utk);
 			String utk1 = utk.substring(0,utk.length()/3);
 			String utk2 = utk.substring(utk.length()/3);
 			byte[] utk2bytes = utk2.getBytes("UTF-8");
 			String hmac_utk1 = Arrays.toString(CryptoPrimitives.generateHmac(utk1.getBytes("UTF-8"), "" + 1));
 			utk_dict.put(hmac_utk1, utk2bytes);
 		}
+		long hmacTime = System.nanoTime();
 		DynRR.update(dictionary, utk_dict); 
+		long endTime = System.nanoTime();
+		System.out.println("HMAC time (ns): " + (hmacTime-start));
+		System.out.println("EDX put time (ns): " + (endTime-hmacTime));
 	}
 	
 	//query
@@ -73,15 +77,32 @@ public class TestDynRR {
     
     // static set up. generates num_tokens of random tokens
 	public static void setup2(int num_tokens, ConcurrentMap<String, byte[]> dictionary) throws UnsupportedEncodingException {
-		Map<String,byte[]> utk = new HashMap<String,byte[]>();
-		for (int i = 0; i < num_tokens; i ++) {
-			String tk1 = getRandomHexString(64);
-			String tk2 = getRandomHexString(128);
-			utk.put(tk1, tk2.getBytes("UTF-8"));
+		int batch = 1000000;
+		int count = 0;
+		// only generates in batches of 1 million
+		if (num_tokens > batch) {
+			for (int i = 0; i < (num_tokens/batch); i ++) {
+//				System.out.println("i: " + i);
+				Map<String,byte[]> utk = new HashMap<String,byte[]>();
+				for (int j = 0; j < batch; j++) {					
+					String tk1 = getRandomHexString(64);
+					String tk2 = getRandomHexString(128);
+					utk.put(tk1, tk2.getBytes("UTF-8"));
+					count += 1;
+				}
+				System.out.println("count: " + count);
+				DynRR.update(dictionary,utk);
+			}
+			
+		} else {
+			Map<String,byte[]> utk = new HashMap<String,byte[]>();
+			for (int i = 0; i < num_tokens; i ++) {
+				String tk1 = getRandomHexString(64);
+				String tk2 = getRandomHexString(128);
+				utk.put(tk1, tk2.getBytes("UTF-8"));
+			}
+			DynRR.update(dictionary,utk);			
 		}
-		DynRR.update(dictionary,utk);
-		System.out.println("Finished Update Timing!");
-		
 	}
 	public static void setup(String filename, ConcurrentMap<String, byte[]> dictionary) throws UnsupportedEncodingException, IOException {
 		String csvfile = filename;
@@ -104,7 +125,6 @@ public class TestDynRR {
 						FileWriter writer = new FileWriter(f1.getName(),true);
 						BufferedWriter bw = new BufferedWriter(writer);
 						bw.write("Lines Read = " + counter + " \n");
-						System.out.println("Lines Read = " + counter);
 						bw.close();
 					} catch(IOException e) {
 						System.out.println("SHOULD NEVER GET HERE");
@@ -141,37 +161,37 @@ public class TestDynRR {
 	
 	public static void main(String[] args) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException  { 
 		DB db = DBMaker.fileDB("test.db").fileMmapEnable().fileMmapPreclearDisable()
-			.allocateStartSize(124 * 1024 * 1024).allocateIncrement(5 * 1024 * 1024).make();
+			.allocateStartSize(1000 * 1024 * 1024).allocateIncrement(250 * 1024 * 1024).make();
+
+//		DB db = DBMaker.fileDB("test.db").fileMmapEnable().fileMmapPreclearDisable()
+//				.allocateStartSize(1000000).allocateIncrement(1000000).make();
+		
 		ConcurrentMap<String, byte[]> dictionary = (ConcurrentMap<String, byte[]>) db.hashMap("test").createOrOpen();		
 
 		// build initial EMM 
 		System.out.println("Buffered Reader Begins Here");
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
 			String input;
-		    while ((input = br.readLine()) != null) {
+			while ((input = br.readLine()) != null) {
 		    		String[] command = input.split(" ", 2);
 			    if (command[0].equals("setup")) {
-					long start = System.nanoTime();
 			    	setup(command[1], dictionary);
-		            System.out.println("setup time (ns): " + ((System.nanoTime()-start)));
 			    }
 			    else if (command[0].equals("setup2")) {
 					long start = System.nanoTime();
 			    	setup2(Integer.parseInt(command[1]), dictionary);
 		            System.out.println("static setup time (ns): " + ((System.nanoTime()-start)));
-
 			    }
 			    else if (command[0].equals("update")) {
 					long start = System.nanoTime();
 			    	update(command[1], dictionary);
 		            System.out.println("update time (ns): " + ((System.nanoTime()-start)));
-
 		        }
 			    else if (command[0].equals("updateBatch")) {
 					long start = System.nanoTime();
 	        		updateBatch(command[1], dictionary);
-		            System.out.println("update batch time (ns): " + ((System.nanoTime()-start)));
-
+	        		long endTime = System.nanoTime() - start;
+		            System.out.println("update batch time (ns): " + endTime);
 			    }
 		        else if (command[0].equals("query")) {
 		        	query(command[1], dictionary);
